@@ -32,6 +32,7 @@ app.get("/", function (req, res) {
 
 
   let users = JSON.parse(fs.readFileSync("users.json").toString());
+  let guestsObj= JSON.parse(fs.readFileSync("guests.json").toString());
 
  //<form  action="/checklogin" method="post"> in login.html form 
 app.post("/checklogin", function (req, res) {
@@ -40,24 +41,51 @@ app.post("/checklogin", function (req, res) {
   //let users = JSON.parse(fs.readFileSync("users.json").toString());
   console.log(users);
  
-
-  // It takes name="user" and name="pass" from input tag in guestbook.html
+  //If user and pass is right and if there is no uer_id in the guestbook 
   for(let i=0; i<users.length; i++){
-    if (users[i].user== req.body.user && users[i].pass==req.body.pass ){
+    if (users[i].user== req.body.user && users[i].pass==req.body.pass){
       //authenticated=true;
-      console.log(users[i].name);
-      req.session.user=users[i];
-      console.log('User authenticated');
-     return res.redirect("/guestbook.html");
-   }
-  }
+     let userAlreadyWrittenGB= false;
+      console.log("User"+ users[i].name);
+      //req.session.user=users[i];
+      console.log("guests length"+guestsObj.length)
 
-   let output = fs.readFileSync("login.html").toString();
-   output = output.replace(
-    "<h5>",
-    "<h5>LOGIN FAILD! Please try again!<br><hr>"
-);
-res.send(output);
+      for(let j=0; j<guestsObj.length; j++){
+       if(users[i].id==guestsObj[j].user_id){
+        console.log("userid:"+users[i].id)
+        console.log("guestbook_userid:"+guestsObj[j].user_id)
+        console.log("Du har redan skrivit vårt guestbook!")
+        userAlreadyWrittenGB =true;
+        break;
+       }
+      }
+
+        if(userAlreadyWrittenGB){ // If a user already write guestbook the user cannot login
+         let output= fs.readFileSync("login.html").toString();
+         output = output.replace(
+          "<h5>",
+          "<h5>LOGIN FAILD! Du har redan skrivit vårt guestbook!<br><hr>"
+      );
+      return res.send(output);
+    }
+    else{
+      //Login!
+      req.session.user=users[i];
+      console.log("req.session.user"+req.session.user.id)
+      console.log('User authenticated');
+      return res.redirect("/guestbook.html");
+
+    }
+   
+  }
+}
+
+    let output = fs.readFileSync("login.html").toString();
+    output = output.replace(
+     "<h5>",
+     "<h5>LOGIN FAILD! Please try it again!<br><hr>"
+ );
+ return res.send(output);
 
 } catch (error){
   console.error('Error reading users.json:', error);
@@ -72,6 +100,7 @@ res.send(output);
  * Post
  * 1. add a guest to guests.json when click subit button
  * 2. redirect to the route guestbook.html 
+ * 3. single HTTP request
  */
 app.post("/addguest", function(req,res){
   
@@ -82,13 +111,32 @@ app.post("/addguest", function(req,res){
   let guests= fs.readFileSync("guests.json").toString();
   guests= JSON.parse(guests);// from Json to Object
 
-  let {name, comment}=req.body;
-  guests.push({name,comment});// Add object to guest.json
+  //let {name, comment}=req.body;
+  let name=req.body.name;
+  let comment= req.body.comment;
+  let user_id= req.session.user.id;
+  guests.push({name,comment,user_id });// Add object to guest.json
   console.log(guests)
   req.body.name='';
   req.body.comment='';
   fs.writeFileSync("guests.json", JSON.stringify(guests));
- return res.redirect("/guestbook.html");// Redirect to guestbook
+
+  let output = fs.readFileSync("guestbook.html").toString();
+      output =output.replace("display: none;", "display: block;");
+      output =output.replace('id="inputName"', 'id="inputName" disabled')
+      output =output.replace('id="inputComment" rows="3"', 'id="inputComment" rows="3" disabled')
+      output =output.replace('<button id="submitBtn" type="submit" class="btn btn-primary">', '<button id="submitBtn" type="submit" class="btn btn-primary" disabled> ')
+      
+     //------------------Here show logined user name--------------------
+     output =output.replace("***NAMN***", req.session.user.name );// replase here to username
+      //------------------Here show the guest list--------------------
+
+      console.log(guests)
+      let guestListHTML = createGuestListHTML(guests);// create HTML here
+      console.log(guestListHTML)
+      output=output.replace("<!-- ***Here printout all guest info*** -->",guestListHTML);
+  return res.send(output)
+ //return res.redirect("/guestbook.html");// Redirect to guestbook
 
 });
 
@@ -114,10 +162,9 @@ let loggedInUserName = req.session.user.name;// declare loggined username
       console.log(guests)
       let guestListHTML = createGuestListHTML(guests);// create HTML here
       console.log(guestListHTML)
-    
       
       output=output.replace("<!-- ***Here printout all guest info*** -->",guestListHTML);
-    
+
       return res.send(output);
       //console.log(output)
 });

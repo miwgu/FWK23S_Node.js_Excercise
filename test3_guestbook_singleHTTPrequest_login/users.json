@@ -1,5 +1,7 @@
 [
-    {"name":"Kalle Anka", "user": "kalank", "pass":"lösen123"},
-    {"name":"Pelle Fjant", "user": "pelfja", "pass": "hemligt!"},
-    {"name":"Lille Skutt", "user": "lilsku", "pass": "secret?"}
+    {"id":1 ,"name":"Kalle Anka", "user": "kalank", "pass":"123"},
+    {"id":2 ,"name":"Pelle Fjant", "user": "pelfja", "pass": "123"},
+    {"id":3 ,"name":"Lille Skutt", "user": "lilsku", "pass": "123"},
+    {"id":4 ,"name":"Miyako", "user": "miy", "pass": "123"},
+    {"id":5 ,"name":"Kayano", "user": "kay", "pass": "123"}
 ]
