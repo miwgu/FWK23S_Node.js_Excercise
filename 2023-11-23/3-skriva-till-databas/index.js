@@ -16,7 +16,7 @@ app.post("/", function (req, res) {
   con = mysql.createConnection({
     host: "localhost", // IP-adress till databas-servern
     user: "root", // standard-användarnamn till XAMPPs databas
-    password: "Miwakodori23!", // standardlösenord
+    password: "", // standardlösenord
     database: "jensen2023", // ÄNDRA TILL NAMN PÅ DIN DATABAS
   });
   con.connect(function (err) {
