@@ -6,6 +6,8 @@ const fs = require("fs");
 const app = express();
 app.listen(3000);
 console.log("Webbservern körs på port 3000.");
+
+
 app.get("/", function (req, res) {
   // skicka query till databasen - se tidigare exempel
   con = mysql.createConnection({

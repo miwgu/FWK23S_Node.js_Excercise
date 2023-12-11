@@ -25,6 +25,7 @@ app.post("/", function (req, res) {
     let sql = `INSERT INTO users (name, username, password, email)
     VALUES ('${req.body.name}', '${req.body.username}', '${req.body.password}', '${req.body.email}')`;
     console.log(sql);
+    
     con.query(sql, function (err, result) {
       if (err) console.log(err);
       res.redirect("/"); // gå tillbaka till get-route
